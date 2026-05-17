@@ -1,6 +1,6 @@
 /** Backend base URL — set NEXT_PUBLIC_API_URL in frontend/.env */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://tamizhili-ai.onrender.com";
 
 export const API_DOCS_URL = `${API_BASE_URL.replace(/\/$/, "")}/docs`;
 
@@ -27,7 +27,7 @@ function formatFetchDetail(payload: unknown): string {
       .map((d) =>
         typeof d === "object" && d !== null && "msg" in d
           ? String((d as { msg: unknown }).msg)
-          : String(d)
+          : String(d),
       )
       .filter(Boolean)
       .join(" ");
@@ -42,7 +42,7 @@ export async function sendChatMessage(
     imageBase64?: string | null;
     /** Backend replies in English or Tamil */
     responseLanguage?: "en" | "ta";
-  }
+  },
 ): Promise<ChatResponse> {
   const body: {
     message: string;
