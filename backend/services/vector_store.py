@@ -9,6 +9,14 @@ from services.embeddings import get_embedding_function
 
 COLLECTION_NAME = "tamil_history"
 
+def ingest_if_empty():
+    db_path = get_chroma_path()
+
+    # check real DB folder
+    if db_path.exists() and any(db_path.iterdir()):
+        return
+
+    ingest_tamil_history(reset=True)
 
 def _chunk_id(chunk: TextChunk) -> str:
     return f"{chunk.source_file}::{chunk.chunk_index}"

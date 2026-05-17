@@ -4,8 +4,10 @@
 Run: uvicorn main:app --reload
 POST /chat accepts JSON with optional inscription image (see schemas.ChatRequest).
 """
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from openai import RateLimitError
 
@@ -13,11 +15,21 @@ from schemas import ChatRequest, ChatResponse
 from services.config import get_settings, use_local_llm
 from services.kallvettu_vision import transcribe_kallvettu_from_payload
 from services.pipeline import run_pipeline
+from services.vector_store import ingest_if_empty
+
+
+# 🧠 Lifespan handler (startup replacement)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ingest_if_empty()
+    yield
+
 
 app = FastAPI(
     title="தமிழி AI",
     description="Interactive Tamil History Learning System API",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 @app.get("/")
