@@ -18,10 +18,11 @@ from services.pipeline import run_pipeline
 from services.vector_store import ingest_if_empty
 
 
-# 🧠 Lifespan handler (startup replacement)
+# 🧠 Lifespan handler (NO heavy startup work on Railway)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ingest_if_empty()
+    # ⚠️ DO NOT run ingestion or Chroma loading here
+    # Railway free tier will crash if heavy work runs at startup
     yield
 
 
@@ -32,9 +33,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-@app.get("/")
-async def root():
-    return {"message": "Backend running"}
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,6 +41,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+async def root():
+    return {"message": "Backend running"}
 
 def build_pipeline_query(req: ChatRequest) -> str:
     """Merge typed question + optional kallvettu OCR transcript into one pipeline input."""
